@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  nginx:
+    build: requirements/nginx
+    container_name: nginx
+    image: nginx:tar
+    env_file:
+      - .env
+    # depends_on:
+    #   - wordpress
+    ports:
+      - target: 443
+        published: 443
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception
+
+  mariadb:
+    build: requirements/mariadb
+    container_name: mariadb
+    image: mariadb:tar
+    env_file:
+      - .env
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - inception
+
+  # wordpress:
+  #   build: requirements/wordpress
+  #   container_name: wordpress
+  #   image: wordpress:tar
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     mariadb:
+  #       condition: service_healthy
+  #   volumes:
+  #     - wordpress:/var/www/html
+  #   networks:
+  #     - inception
+
+volumes:
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      type: bind
+      o: bind
+      device: /home/tamehri/data/wordpress
+  db:
+    name: db
+    driver: local
+    driver_opts:
+      type: bind
+      o: bind
+      device: /home/tamehri/data/database
+
+networks:
+  inception:
+    name: inception
+    driver: bridge
