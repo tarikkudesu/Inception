@@ -16,6 +16,8 @@ services:
       - wordpress:/var/www/html
     networks:
       - inception
+    restart:
+      always
 
   mariadb:
     build: requirements/mariadb
@@ -27,6 +29,8 @@ services:
       - db:/var/lib/mysql
     networks:
       - inception
+    restart:
+      always
 
   wordpress:
     build: requirements/wordpress
@@ -40,6 +44,8 @@ services:
       - wordpress:/var/www/html
     networks:
       - inception
+    restart:
+      always
 
 volumes:
   wordpress:

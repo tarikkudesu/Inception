@@ -12,4 +12,4 @@ sed -i 's/bind-address            = 127.0.0.1/bind-address            = 0.0.0.0/
 
 mysqladmin -u root shutdown
 
-mysqld --port=3300 --user=root
+mysqld --port=3306 --user=root

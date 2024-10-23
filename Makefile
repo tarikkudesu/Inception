@@ -1,7 +1,7 @@
 WP_DIR		=	/home/tamehri/data/wordpress
 DB_DIR		=	/home/tamehri/data/database
 CONTAINERS	=	$$(docker ps -aq)
-IMAGES		=	$$(docker image ls -aq | grep -v fd320476a1f2 | grep -v c7f9867d6721)
+IMAGES		=	$$(docker image ls -aq | grep -v 0a3388cbc545)
 VOLUMES		=	$$(docker volume ls -q)
 NETWORKS	=	$$(docker network ls -q --filter "type=custom")
 COMPOSEFILE	=	srcs/docker-compose.yml
@@ -52,7 +52,7 @@ cleancontainers:
 	@if [ -z "$(CONTAINERS)" ]; then \
 		echo "No containers"; \
 	else \
-		docker stop $(CONTAINERS) && docker rm -f $(CONTAINERS) || true; \
+		docker stop $(CONTAINERS) && docker rm -f $(CONTAINERS) 2>/dev/null || true; \
 	fi
 
 cleanimages:
@@ -60,7 +60,7 @@ cleanimages:
 	@if [ -z "$(IMAGES)" ]; then \
 		echo "No images"; \
 	else \
-		docker image rm -f $(IMAGES) || true; \
+		docker image rm -f $(IMAGES) 2>/dev/null || true; \
 	fi
 
 cleanvolumes:
@@ -68,7 +68,7 @@ cleanvolumes:
 	@if [ -z "$(VOLUMES)" ]; then \
 		echo "No volumes"; \
 	else \
-		docker volume rm -f $(VOLUMES) || true; \
+		docker volume rm -f $(VOLUMES) 2>/dev/null || true; \
 	fi
 
 cleannetworks:
@@ -76,7 +76,7 @@ cleannetworks:
 	@if [ -z "$(NETWORKS)" ]; then \
 		echo "No networks"; \
 	else \
-		docker network rm -f $(NETWORKS) || true; \
+		docker network rm -f $(NETWORKS) 2>/dev/null || true; \
 	fi
 
 clean: cleancontainers cleanimages cleanvolumes cleannetworks
