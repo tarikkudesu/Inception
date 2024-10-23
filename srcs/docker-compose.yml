@@ -7,8 +7,8 @@ services:
     image: nginx:tar
     env_file:
       - .env
-    # depends_on:
-    #   - wordpress
+    depends_on:
+      - wordpress
     ports:
       - target: 443
         published: 443
@@ -28,19 +28,18 @@ services:
     networks:
       - inception
 
-  # wordpress:
-  #   build: requirements/wordpress
-  #   container_name: wordpress
-  #   image: wordpress:tar
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     mariadb:
-  #       condition: service_healthy
-  #   volumes:
-  #     - wordpress:/var/www/html
-  #   networks:
-  #     - inception
+  wordpress:
+    build: requirements/wordpress
+    container_name: wordpress
+    image: wordpress:tar
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception
 
 volumes:
   wordpress:
