@@ -1,10 +1,12 @@
 WP_DIR		=	/home/tamehri/data/wordpress
 DB_DIR		=	/home/tamehri/data/database
 CONTAINERS	=	$$(docker ps -aq)
-IMAGES		=	$$(docker image ls -aq | grep -v 0a3388cbc545)
+IMAGES		=	$$(docker image ls -aq | grep -v 0a3388cbc545 | grep -v 0a3388cbc545)
 VOLUMES		=	$$(docker volume ls -q)
 NETWORKS	=	$$(docker network ls -q --filter "type=custom")
 COMPOSEFILE	=	srcs/docker-compose.yml
+GREEN		:=	\033[0;32m
+RESET		:=	\033[0m
 
 all: up
 
@@ -15,8 +17,6 @@ up:
 
 down:
 	@docker compose -f $(COMPOSEFILE) down
-	@sudo rm -rf $(WP_DIR)
-	@sudo rm -rf $(DB_DIR)
 
 build:
 	@docker compose -f $(COMPOSEFILE) build
@@ -48,39 +48,30 @@ ls:
 	@docker network ls --filter "type=custom"
 
 cleancontainers:
-	@echo "cleaning containers ..."
-	@if [ -z "$(CONTAINERS)" ]; then \
-		echo "No containers"; \
-	else \
-		docker stop $(CONTAINERS) && docker rm -f $(CONTAINERS) 2>/dev/null || true; \
-	fi
+	@echo -n " ✔ cleaning containers ..."
+	@docker stop $(CONTAINERS) > /dev/null 2>&1 || true
+	@docker rm -f $(CONTAINERS) > /dev/null 2>&1 || true
+	@echo "$(GREEN)\tDone$(RESET)"
 
 cleanimages:
-	@echo "cleaning images ..."
-	@if [ -z "$(IMAGES)" ]; then \
-		echo "No images"; \
-	else \
-		docker image rm -f $(IMAGES) 2>/dev/null || true; \
-	fi
-
-cleanvolumes:
-	@echo "cleaning volumes ..."
-	@if [ -z "$(VOLUMES)" ]; then \
-		echo "No volumes"; \
-	else \
-		docker volume rm -f $(VOLUMES) 2>/dev/null || true; \
-	fi
+	@echo -n " ✔ cleaning images ..."
+	@docker image rm -f $(IMAGES) > /dev/null 2>&1 || true
+	@echo "$(GREEN)\t\tDone$(RESET)"
 
 cleannetworks:
-	@echo "cleaning networks ..."
-	@if [ -z "$(NETWORKS)" ]; then \
-		echo "No networks"; \
-	else \
-		docker network rm -f $(NETWORKS) 2>/dev/null || true; \
-	fi
+	@echo -n " ✔ cleaning networks ..."
+	@docker network rm -f $(NETWORKS) > /dev/null 2>&1 || true
+	@echo "$(GREEN)\tDone$(RESET)"
 
-clean: cleancontainers cleanimages cleanvolumes cleannetworks
+cleanvolumes:
+	@echo -n " ✔ cleaning volumes ..."
+	@docker volume rm -f $(VOLUMES) > /dev/null 2>&1 || true
+	@echo "$(GREEN)\t\tDone$(RESET)"
+
+clean: cleancontainers cleanimages cleannetworks
+
+fclean: clean cleanvolumes
 	@sudo rm -rf $(WP_DIR)
 	@sudo rm -rf $(DB_DIR)
 
-re: down up
+re: fclean up
