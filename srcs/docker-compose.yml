@@ -46,6 +46,15 @@ services:
     restart:
       always
 
+  redis:
+    build: requirements/bonus/redis
+    container_name: redis
+    image: redis:tar
+    networks:
+      - inception
+    restart:
+      always
+
 volumes:
   wordpress:
     name: wordpress
