@@ -11,27 +11,27 @@ all: up
 up:
 	@sudo mkdir -p $(WP_DIR)
 	@sudo mkdir -p $(DB_DIR)
-	@docker-compose -f $(COMPOSEFILE) up -d
+	@docker compose -f $(COMPOSEFILE) up -d
 
 down:
-	@docker-compose -f $(COMPOSEFILE) down
+	@docker compose -f $(COMPOSEFILE) down
 	@sudo rm -rf $(WP_DIR)
 	@sudo rm -rf $(DB_DIR)
 
 build:
-	@docker-compose -f $(COMPOSEFILE) build
+	@docker compose -f $(COMPOSEFILE) build
 
 ps:
-	@docker-compose -f $(COMPOSEFILE) ps
+	@docker compose -f $(COMPOSEFILE) ps
 
 top:
-	@docker-compose -f $(COMPOSEFILE) top
+	@docker compose -f $(COMPOSEFILE) top
 
 stop:
-	@docker-compose -f $(COMPOSEFILE) stop
+	@docker compose -f $(COMPOSEFILE) stop
 
 restart:
-	@docker-compose -f $(COMPOSEFILE) restart
+	@docker compose -f $(COMPOSEFILE) restart
 
 clearv:
 	@sudo rm -rf /home/ubuntu/Desktop/Inception/wpdb/*
