@@ -1,18 +1,18 @@
-WP_DIR		=	/home/tamehri/data/wordpress
-DB_DIR		=	/home/tamehri/data/database
-CONTAINERS	=	$$(docker ps -aq)
-IMAGES		=	$$(docker image ls -aq | grep -v 0a3388cbc545 | grep -v 0a3388cbc545)
-VOLUMES		=	$$(docker volume ls -q)
-NETWORKS	=	$$(docker network ls -q --filter "type=custom")
-COMPOSEFILE	=	srcs/docker-compose.yml
-GREEN		:=	\033[0;32m
-RESET		:=	\033[0m
+WP_DIR			=	/home/tamehri/data/wordpress
+DB_DIR			=	/home/tamehri/data/database
+BU_DIR			=	/home/tamehri/data/backup
+IMAGES			=	$$(docker image ls -aq | grep -v 0a3388cbc545)
+NETWORKS		=	$$(docker network ls -q --filter "type=custom")
+VOLUMES			=	$$(docker volume ls -q)
+CONTAINERS		=	$$(docker ps -aq)
+COMPOSEFILE		=	srcs/docker-compose.yml
+GREEN			=	\033[0;32m
+RESET			=	\033[0m
 
 all: up
 
 up:
-	@sudo mkdir -p $(WP_DIR)
-	@sudo mkdir -p $(DB_DIR)
+	@sudo mkdir -p $(WP_DIR) $(DB_DIR) $(BU_DIR)
 	@docker compose -f $(COMPOSEFILE) up -d
 
 down:
@@ -33,15 +33,11 @@ stop:
 restart:
 	@docker compose -f $(COMPOSEFILE) restart
 
-clearv:
-	@sudo rm -rf /home/ubuntu/Desktop/Inception/wpdb/*
-	@sudo rm -rf /home/ubuntu/Desktop/Inception/wordpress/*
-
 ls:
 	@echo "______________________________________________________________________"
 	@docker images
 	@echo "______________________________________________________________________"
-	@docker ps -a
+	@docker ps --all
 	@echo "______________________________________________________________________"
 	@docker volume ls
 	@echo "______________________________________________________________________"
@@ -71,7 +67,11 @@ cleanvolumes:
 clean: cleancontainers cleanimages cleannetworks
 
 fclean: clean cleanvolumes
-	@sudo rm -rf $(WP_DIR)
-	@sudo rm -rf $(DB_DIR)
+	@docker system prune --all --force > /dev/null 2>&1 || true
+	@sudo rm -rf $(WP_DIR) $(DB_DIR) $(BU_DIR)
+
+prune:
+	@docker system prune --all --force > /dev/null 2>&1 || true
+	@sudo rm -rf $(WP_DIR) $(DB_DIR) $(BU_DIR)
 
 re: fclean up

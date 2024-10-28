@@ -55,6 +55,28 @@ services:
     restart:
       always
 
+  adminer:
+    build: requirements/bonus/adminer
+    container_name: adminer
+    image: adminer:tar
+    ports:
+      - target: 8000
+        published: 8000
+    networks:
+      - inception
+    restart:
+      always
+
+  static:
+    build: requirements/bonus/static
+    container_name: static
+    image: static:tar
+    ports:
+      - target: 1200
+        published: 1200
+    restart:
+      always
+
 volumes:
   wordpress:
     name: wordpress
@@ -70,6 +92,14 @@ volumes:
       type: bind
       o: bind
       device: /home/tamehri/data/database
+
+  rsync:
+    name: rsync
+    driver: local
+    driver_opts:
+      type: bind
+      o: bind
+      device: /home/tamehri/data/backup
 
 networks:
   inception:
