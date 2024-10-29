@@ -77,6 +77,20 @@ services:
     restart:
       always
 
+  rsync:
+    build: requirements/bonus/rsync
+    container_name: rsync
+    image: rsync:tar
+    env_file:
+      - .env
+    volumes:
+      - wordpress:/var/www/html
+      - rsync:/home/backup/
+    networks:
+      - inception
+    restart:
+      always
+
 volumes:
   wordpress:
     name: wordpress
