@@ -1,7 +1,7 @@
 WP_DIR			=	/home/tamehri/data/wordpress
 DB_DIR			=	/home/tamehri/data/database
 BU_DIR			=	/home/tamehri/data/backup
-IMAGES			=	$$(docker image ls -aq | grep -v 0a3388cbc545)
+IMAGES			=	$$(docker image ls -aq | grep -v 1ddedd6ca43f)
 NETWORKS		=	$$(docker network ls -q --filter "type=custom")
 VOLUMES			=	$$(docker volume ls -q)
 CONTAINERS		=	$$(docker ps -aq)

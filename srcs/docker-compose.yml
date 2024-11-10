@@ -91,6 +91,23 @@ services:
     restart:
       always
 
+  ftp:
+    build: requirements/bonus/ftp
+    container_name: ftp
+    image: ftp:tar
+    env_file:
+      - .env
+    ports:
+      - "21:21"
+      - "20:20"
+      - "30000-30009:30000-30009"
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception
+    restart:
+      always
+
 volumes:
   wordpress:
     name: wordpress
