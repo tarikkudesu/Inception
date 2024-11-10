@@ -46,46 +46,10 @@ services:
     restart:
       always
 
-  redis:
+  redis: # ------------------------------------------------
     build: requirements/bonus/redis
     container_name: redis
     image: redis:tar
-    networks:
-      - inception
-    restart:
-      always
-
-  adminer:
-    build: requirements/bonus/adminer
-    container_name: adminer
-    image: adminer:tar
-    ports:
-      - target: 8000
-        published: 8000
-    networks:
-      - inception
-    restart:
-      always
-
-  static:
-    build: requirements/bonus/static
-    container_name: static
-    image: static:tar
-    ports:
-      - target: 1200
-        published: 1200
-    restart:
-      always
-
-  rsync:
-    build: requirements/bonus/rsync
-    container_name: rsync
-    image: rsync:tar
-    env_file:
-      - .env
-    volumes:
-      - wordpress:/var/www/html
-      - rsync:/home/backup/
     networks:
       - inception
     restart:
@@ -102,6 +66,42 @@ services:
       - "30000-30009:30000-30009"
     volumes:
       - wordpress:/var/www/html
+    networks:
+      - inception
+    restart:
+      always
+
+  static:
+    build: requirements/bonus/static
+    container_name: static
+    image: static:tar
+    ports:
+      - target: 1200
+        published: 1200
+    restart:
+      always
+
+  adminer:
+    build: requirements/bonus/adminer
+    container_name: adminer
+    image: adminer:tar
+    ports:
+      - target: 8000
+        published: 8000
+    networks:
+      - inception
+    restart:
+      always
+
+  rsync:
+    build: requirements/bonus/rsync
+    container_name: rsync
+    image: rsync:tar
+    env_file:
+      - .env
+    volumes:
+      - wordpress:/var/www/html
+      - rsync:/home/backup/
     networks:
       - inception
     restart:
