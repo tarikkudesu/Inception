@@ -39,8 +39,7 @@ http {
 
 ### Dockerfile :
 
-```docker
-
+```Dockerfile
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y nginx openssl
@@ -70,7 +69,7 @@ nginx -g "daemon off;"
 
 ### Dockerfile :
 
-```docker
+```Dockerfile
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y curl php php-mysql php7.4-fpm mariadb-client
@@ -136,7 +135,7 @@ The wordpress installation needs database, in this case mariadb.
 
 ### Dockerfile :
 
-```docker
+```Dockerfile
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y mariadb-server
@@ -172,7 +171,7 @@ Redis is an in-memory database that is also refered to as a data structure serve
 
 ### Dockerfile :
 
-```docker
+```Dockerfile
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y redis-server
@@ -200,7 +199,7 @@ FTP is a standard network protocol used to transfer files between a client and a
 
 In our case we need set up server pointing to the wordpress volume so that we can upload and download files.
 
-```docker
+```Dockerfile
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y vsftpd ftp
@@ -270,7 +269,7 @@ http {
 
 ### Dockerfile :
 
-```bash
+```Dockerfile
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y nginx openssl
@@ -299,7 +298,7 @@ nginx -g "daemon off;"
 
 Adminer is a single php file application that is easy to deploy and provides a simple web interface for easy access. and supports multiple database management systems, including MySQL, MariaDB, PostgreSQL, SQLite, MS SQL, and others.
 
-```docker
+```Dockerfile
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y wget php php-mysqli
@@ -323,7 +322,7 @@ rsync is a powerful command-line utility for efficiently copying and synchronizi
 
 ### Dockerfile :
 
-```bash
+```Dockerfile
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y cron rsync mariadb-client
@@ -352,7 +351,7 @@ cron -f
 
 # Compose file :
 
-```docker
+```yaml
 
 services:
   nginx:
