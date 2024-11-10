@@ -23,8 +23,8 @@ local_root=/var/www/html
 secure_chroot_dir=/var/run/vsftpd/empty
 EOF
 
-useradd -m -d /var/www/html "$FTP_USER"
-echo "$FTP_USER:$FTP_PASS" | chpasswd
-chown -R "$FTP_USER:$FTP_USER" /var/www
+useradd -m -d /var/www/html "$INCEPTION_FTP_USER"
+echo "$INCEPTION_FTP_USER:$INCEPTION_FTP_PASS" | chpasswd
+chown -R "$INCEPTION_FTP_USER:$INCEPTION_FTP_USER" /var/www
 
 exec /usr/sbin/vsftpd /etc/vsftpd.conf

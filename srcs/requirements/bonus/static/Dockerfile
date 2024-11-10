@@ -1,8 +1,9 @@
 
 FROM debian:bullseye
-RUN apt-get update -y && apt-get upgrade -y && apt-get install -y nginx vim
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y nginx openssl vim
 RUN mkdir -p /var/www/html
-WORKDIR /var/www/html
-COPY ./tools/website .
+COPY ./tools/website /var/www/html
 COPY ./conf/nginx.conf /etc/nginx/nginx.conf
-ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
+COPY ./tools/setup.sh /
+RUN chmod +x /setup.sh
+ENTRYPOINT [ "/setup.sh" ]
