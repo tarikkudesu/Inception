@@ -10,7 +10,7 @@ NGINX should be configured according to the application requirements and the con
 
 ### Configuration file :
 
-```json
+```bash
 user www-data;
 
 events {}
@@ -248,7 +248,7 @@ I created a simple website with html, css and js that will served using an nginx
 
 ### Configuration file :
 
-```json
+```bash
 
 events {}
 
