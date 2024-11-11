@@ -73,6 +73,8 @@ fclean: clean cleanvolumes
 
 prune:
 	@docker system prune --all --force > /dev/null 2>&1 || true
-	sudo rm -rf $(WP_DIR) $(DB_DIR) $(BU_DIR)
+	@sudo rm -rf $(WP_DIR) $(DB_DIR) $(BU_DIR)
 
 re: fclean up
+
+.PHONY: down build ps top stop restart ls cleancontainers cleanimages cleannetworks cleanvolumes clean fclean prune re
