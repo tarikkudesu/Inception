@@ -60,7 +60,7 @@ chown -R www-data:www-data /var/www/html
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/nginx/ssl/inception.key \
     -out /etc/nginx/ssl/inception.crt \
-    -subj "/C=MO/ST=KH/O=42/OU=42/CN=tamehri.42.fr"
+    -subj "/C=MO/ST=KH/O=42/OU=42/CN=login.42.fr"
 nginx -g "daemon off;"
 ```
 
@@ -258,7 +258,7 @@ http {
     server {
         listen 1200 ssl;
         root /var/www/html;
-        server_name tamehri.42.fr;
+        server_name login.42.fr;
         index index.html;
 
         ssl_certificate /etc/nginx/ssl/inception.crt;
@@ -291,7 +291,7 @@ chown -R www-data:www-data /var/www/html
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/nginx/ssl/inception.key \
     -out /etc/nginx/ssl/inception.crt \
-    -subj "/C=MO/ST=KH/O=42/OU=42/CN=tamehri.42.fr"
+    -subj "/C=MO/ST=KH/O=42/OU=42/CN=login.42.fr"
 nginx -g "daemon off;"
 ```
 
@@ -469,14 +469,14 @@ volumes:
     driver_opts:
       type: bind
       o: bind
-      device: /home/tamehri/data/wordpress
+      device: /home/login/data/wordpress
   db:
     name: db
     driver: local
     driver_opts:
       type: bind
       o: bind
-      device: /home/tamehri/data/database
+      device: /home/login/data/database
 
   rsync:
     name: rsync
@@ -484,7 +484,7 @@ volumes:
     driver_opts:
       type: bind
       o: bind
-      device: /home/tamehri/data/backup
+      device: /home/login/data/backup
 
 networks:
   inception:

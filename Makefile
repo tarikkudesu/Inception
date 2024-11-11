@@ -1,6 +1,7 @@
-WP_DIR			=	/home/tamehri/data/wordpress
-DB_DIR			=	/home/tamehri/data/database
-BU_DIR			=	/home/tamehri/data/backup
+INCEPTION_LOGIN	=	tamehri
+WP_DIR			=	/home/$(INCEPTION_LOGIN)/data/wordpress
+DB_DIR			=	/home/$(INCEPTION_LOGIN)/data/database
+BU_DIR			=	/home/$(INCEPTION_LOGIN)/data/backup
 IMAGES			=	$$(docker image ls -aq | grep -v 1ddedd6ca43f)
 NETWORKS		=	$$(docker network ls -q --filter "type=custom")
 VOLUMES			=	$$(docker volume ls -q)
@@ -13,25 +14,25 @@ all: up
 
 up:
 	@sudo mkdir -p $(WP_DIR) $(DB_DIR) $(BU_DIR)
-	@docker compose -f $(COMPOSEFILE) up -d
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) up -d
 
 down:
-	@docker compose -f $(COMPOSEFILE) down
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) down
 
 build:
-	@docker compose -f $(COMPOSEFILE) build
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) build
 
 ps:
-	@docker compose -f $(COMPOSEFILE) ps
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) ps
 
 top:
-	@docker compose -f $(COMPOSEFILE) top
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) top
 
 stop:
-	@docker compose -f $(COMPOSEFILE) stop
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) stop
 
 restart:
-	@docker compose -f $(COMPOSEFILE) restart
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) restart
 
 ls:
 	@echo "______________________________________________________________________"
@@ -72,6 +73,6 @@ fclean: clean cleanvolumes
 
 prune:
 	@docker system prune --all --force > /dev/null 2>&1 || true
-	@sudo rm -rf $(WP_DIR) $(DB_DIR) $(BU_DIR)
+	sudo rm -rf $(WP_DIR) $(DB_DIR) $(BU_DIR)
 
 re: fclean up

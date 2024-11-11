@@ -46,7 +46,7 @@ services:
     restart:
       always
 
-  redis: # ------------------------------------------------
+  redis:
     build: requirements/bonus/redis
     container_name: redis
     image: redis:tar
@@ -75,6 +75,8 @@ services:
     build: requirements/bonus/static
     container_name: static
     image: static:tar
+    env_file:
+      - .env
     ports:
       - target: 1200
         published: 1200
@@ -114,14 +116,14 @@ volumes:
     driver_opts:
       type: bind
       o: bind
-      device: /home/tamehri/data/wordpress
+      device: "/home/${INCEPTION_LOGIN}/data/wordpress"
   db:
     name: db
     driver: local
     driver_opts:
       type: bind
       o: bind
-      device: /home/tamehri/data/database
+      device: "/home/${INCEPTION_LOGIN}/data/database"
 
   rsync:
     name: rsync
@@ -129,7 +131,7 @@ volumes:
     driver_opts:
       type: bind
       o: bind
-      device: /home/tamehri/data/backup
+      device: "/home/${INCEPTION_LOGIN}/data/backup"
 
 networks:
   inception:
