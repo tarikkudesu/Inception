@@ -155,7 +155,7 @@ It defines three major building blocks:
 
 A container can have multiple endpoints connected to different networks.
 
-Docker ships with several built-in drivers, or as I like to think about them (Network types), that are responsible the connectivity and the actual network creation and isolation of networks.
+Docker ships with several built-in drivers (Network types), that are responsible for the connectivity and isolation, and the actual network creation.
 
 Libnetwork includes the following driver packages (null, bridge, overlay and remote).
 

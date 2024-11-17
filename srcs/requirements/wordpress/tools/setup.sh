@@ -7,7 +7,9 @@ chmod -R 755 /var/www/html
 sed -i '36 s/\/run\/php\/php7.4-fpm.sock/9000/' /etc/php/7.4/fpm/pool.d/www.conf
 
 wait_for_mariadb() {
-    until mariadb -h mariadb -P 3306 -u "${INCEPTION_MYSQL_USER}" -p"${INCEPTION_MYSQL_PASS}" -e "SELECT 1"; do
+    until mariadb -h mariadb -P 3306 \
+		-u "${INCEPTION_MYSQL_USER}" \
+		-p"${INCEPTION_MYSQL_PASS}" -e "SELECT 1"; do
         sleep 2
     done
 }
@@ -28,6 +30,8 @@ wp core install \
 wp user create ${INCEPTION_WP_U_NAME} ${INCEPTION_WP_U_EMAIL} \
 	--user_pass=${INCEPTION_WP_U_PASS} \
 	--role=${INCEPTION_WP_U_ROLE} --allow-root
+
+wp theme install twentytwentyfour --activate --allow-root
 
 wp config set WP_CACHE 'true' --allow-root
 wp plugin install redis-cache --activate --allow-root

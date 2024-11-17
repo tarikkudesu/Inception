@@ -2,8 +2,8 @@ INCEPTION_LOGIN	=	tamehri
 WP_DIR			=	/home/$(INCEPTION_LOGIN)/data/wordpress
 DB_DIR			=	/home/$(INCEPTION_LOGIN)/data/database
 BU_DIR			=	/home/$(INCEPTION_LOGIN)/data/backup
-IMAGES			=	$$(docker image ls -aq | grep -v 1ddedd6ca43f)
 NETWORKS		=	$$(docker network ls -q --filter "type=custom")
+IMAGES			=	$$(docker image ls -aq)
 VOLUMES			=	$$(docker volume ls -q)
 CONTAINERS		=	$$(docker ps -aq)
 COMPOSEFILE		=	srcs/docker-compose.yml
@@ -12,27 +12,25 @@ RESET			=	\033[0m
 
 all: up
 
-up:
-	@sudo mkdir -p $(WP_DIR) $(DB_DIR) $(BU_DIR)
-	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) up -d
-
+up: mkdir build
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@ -d
 down:
-	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) down
-
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
 build:
-	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) build
-
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
 ps:
-	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) ps
-
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
 top:
-	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) top
-
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
 stop:
-	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) stop
-
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
 restart:
-	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) restart
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
+
+mkdir:
+	@mkdir -p $(WP_DIR) $(DB_DIR) $(BU_DIR)
+rmdir:
+	@sudo rm -rf $(WP_DIR) $(DB_DIR) $(BU_DIR)
 
 ls:
 	@echo "______________________________________________________________________"
@@ -67,14 +65,12 @@ cleanvolumes:
 
 clean: cleancontainers cleanimages cleannetworks
 
-fclean: clean cleanvolumes
-	@docker system prune --all --force > /dev/null 2>&1 || true
-	@sudo rm -rf $(WP_DIR) $(DB_DIR) $(BU_DIR)
+fclean: clean cleanvolumes rmdir
 
 prune:
 	@docker system prune --all --force > /dev/null 2>&1 || true
-	@sudo rm -rf $(WP_DIR) $(DB_DIR) $(BU_DIR)
+	@$(MAKE) rmdir
 
 re: fclean up
 
-.PHONY: down build ps top stop restart ls cleancontainers cleanimages cleannetworks cleanvolumes clean fclean prune re
+.PHONY: up down build ps top stop restart ls cleancontainers cleanimages cleannetworks cleanvolumes clean fclean prune re
