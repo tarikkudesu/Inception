@@ -6,7 +6,11 @@ And you can also check [Docker The thechnical stuff](cheat-sheet.md)
 
 # 42 Inception: MariaDb + WordPress + NGINX + bonus
 
+![Containerization.jpeg](img/Inception.jpeg)
+
 This project is designed to introduce you to the fundamentals of Docker and help you build a small infrastructure using containers. We'll be setting up a basic architecture with several services, allowing you to get hands-on experience with Docker concepts and configurations.
+
+![Containerization.jpeg](img/overview.jpeg)
 
 # NGINX :
 
