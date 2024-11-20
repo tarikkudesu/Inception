@@ -2,7 +2,7 @@
 
 You can checkout [Docker The theoretical stuff](Docker-The-theoretical-stuff.md)
 
-And you can also check [Docker The thechnical stuff](cheat-sheet.md)
+And you can also check [Docker The thechnical stuff](Docker-The-thechnical-stuff.md)
 
 # 42 Inception: MariaDb + WordPress + NGINX + bonus
 
