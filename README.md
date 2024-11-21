@@ -232,23 +232,20 @@ write_enable=YES
 local_umask=022
 # log upoads and downloads
 xferlog_enable=YES
-# limit users to their home directory
-chroot_local_user=YES
-allow_writeable_chroot=YES
 pasv_enable=YES
 pasv_address=${INCEPTION_IP}
 pasv_min_port=30000
 pasv_max_port=30009
-local_root=/var/www/html
+local_root=/home/${INCEPTION_FTP_USER}
 secure_chroot_dir=/var/run/vsftpd/empty
 # http://vsftpd.beasts.org/vsftpd_conf.html
 EOF
 
-useradd -m -d /var/www/html "${INCEPTION_FTP_USER}"
+useradd -m -d /home/${INCEPTION_FTP_USER} "${INCEPTION_FTP_USER}"
 echo "${INCEPTION_FTP_USER}:${INCEPTION_FTP_PASS}" | chpasswd
-chown -R "${INCEPTION_FTP_USER}:${INCEPTION_FTP_USER}" /var/www
+service vsftpd stop
 
-exec /usr/sbin/vsftpd
+/usr/sbin/vsftpd /etc/vsftpd.conf
 ```
 
 # Static website :
@@ -358,6 +355,7 @@ cron -f
 # Compose file :
 
 ```docker
+
 services:
   nginx:
     build: requirements/nginx
@@ -424,7 +422,7 @@ services:
       - "21:21"
       - "30000-30009:30000-30009"
     volumes:
-      - wordpress:/var/www/html
+      - wordpress:/home/wordpress
     networks:
       - inception
     restart:
@@ -439,6 +437,8 @@ services:
     ports:
       - target: 1200
         published: 1200
+    networks:
+      - inception
     restart:
       always
 
@@ -483,7 +483,6 @@ volumes:
       type: bind
       o: bind
       device: "/home/${INCEPTION_LOGIN}/data/database"
-
   rsync:
     name: rsync
     driver: local
