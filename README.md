@@ -24,10 +24,9 @@ NGINX should be configured according to the application requirements and the con
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y nginx openssl
-COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 COPY ./tools/setup.sh /setup.sh
-RUN chmod +x /setup.sh
-ENTRYPOINT [ "/setup.sh" ]
+RUN chmod +x /setup.sh && /setup.sh
+ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
 ```
 
 The following script will be used to setup nginx.
@@ -36,7 +35,6 @@ The following script will be used to setup nginx.
 #!/bin/bash
 
 cat <<EOF > /etc/nginx/nginx.conf
-user www-data;
 events {}
 http {
     include /etc/nginx/mime.types;
@@ -49,7 +47,7 @@ http {
 
         ssl_certificate /etc/nginx/ssl/inception.crt;
         ssl_certificate_key /etc/nginx/ssl/inception.key;
-        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_protocols TLSv1.3;
 
         location ~ \.php$ {
             include snippets/fastcgi-php.conf;
@@ -60,12 +58,10 @@ http {
 EOF
 
 mkdir -p /etc/nginx/ssl
-chown -R www-data:www-data /var/www/html
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/nginx/ssl/inception.key \
     -out /etc/nginx/ssl/inception.crt \
     -subj "/C=MO/ST=KH/O=42/OU=42/CN=${INCEPTION_LOGIN}.42.fr"
-nginx -g "daemon off;"
 ```
 
 # WordPress : using the WP-CLI
@@ -94,34 +90,34 @@ cd /var/www/html
 chmod -R 755 /var/www/html
 sed -i '36 s/\/run\/php\/php7.4-fpm.sock/9000/' /etc/php/7.4/fpm/pool.d/www.conf
 
-wait_for_mariadb() {
-    until mariadb -h mariadb -P 3306 \
-		-u "${INCEPTION_MYSQL_USER}" \
-		-p"${INCEPTION_MYSQL_PASS}" -e "SELECT 1"; do
+for ((i = 1; i <= 10; i++)); do
+    if mariadb -h mariadb -P 3306 \
+        -u "${INCEPTION_MYSQL_USER}" \
+        -p"${INCEPTION_MYSQL_PASS}" -e "SELECT 1" > /dev/null 2>&1; then
+        break
+    else
         sleep 2
-    done
-}
-wait_for_mariadb
+    fi
+done
 
 wp core download --allow-root
 wp config create \
-	--dbname=${INCEPTION_MYSQL_DATABASE} \
-	--dbuser=${INCEPTION_MYSQL_USER} \
-	--dbpass=${INCEPTION_MYSQL_PASS} \
-	--dbhost=mariadb:3306 --allow-root
+    --dbname=${INCEPTION_MYSQL_DATABASE} \
+    --dbuser=${INCEPTION_MYSQL_USER} \
+    --dbpass=${INCEPTION_MYSQL_PASS} \
+    --dbhost=mariadb:3306 --allow-root
 wp core install \
-	--url=${INCEPTION_DOMAIN_NAME} \
-	--title=${INCEPTION_WP_TITLE} \
-	--admin_user=${INCEPTION_WP_A_NAME} \
-	--admin_password=${INCEPTION_WP_A_PASS} \
-	--admin_email=${INCEPTION_WP_A_EMAIL} --allow-root
+    --url=${INCEPTION_DOMAIN_NAME} \
+    --title=${INCEPTION_WP_TITLE} \
+    --admin_user=${INCEPTION_WP_A_NAME} \
+    --admin_password=${INCEPTION_WP_A_PASS} \
+    --admin_email=${INCEPTION_WP_A_EMAIL} --allow-root
 wp user create ${INCEPTION_WP_U_NAME} ${INCEPTION_WP_U_EMAIL} \
-	--user_pass=${INCEPTION_WP_U_PASS} \
-	--role=${INCEPTION_WP_U_ROLE} --allow-root
+    --user_pass=${INCEPTION_WP_U_PASS} \
+    --role=${INCEPTION_WP_U_ROLE} --allow-root
 
 wp theme install twentytwentyfour --activate --allow-root
 
-wp config set WP_CACHE 'true' --allow-root
 wp plugin install redis-cache --activate --allow-root
 wp config set WP_REDIS_HOST redis --allow-root
 wp config set WP_REDIS_PORT 6379 --raw --allow-root
@@ -154,19 +150,12 @@ The following script will be used to configure the database for wordpress.
 #!/bin/bash
 
 service mariadb start
-# create database
 mariadb -e "CREATE DATABASE IF NOT EXISTS ${INCEPTION_MYSQL_DATABASE}"
-# create user
 mariadb -e "CREATE USER IF NOT EXISTS '${INCEPTION_MYSQL_USER}'@'%' IDENTIFIED BY '${INCEPTION_MYSQL_PASS}'"
-# give privileges to the user
 mariadb -e "GRANT ALL ON ${INCEPTION_MYSQL_DATABASE}.* TO '${INCEPTION_MYSQL_USER}'@'%';"
-# flush privileges
 mariadb -e "FLUSH PRIVILEGES;"
-# configure mariadb to accept connection from any host
-sed -i 's/bind-address            = 127.0.0.1/bind-address            = 0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
-# shut down and start server daemon, configure it to accept connections through port 3306
-mysqladmin -u root shutdown
-mysqld --port=3306 --user=root
+mysqladmin shutdown -u root
+mysqld --bind-address=0.0.0.0 --port=3306 --user=root
 ```
 
 # Redis-cache :
@@ -180,8 +169,8 @@ FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y redis-server
 COPY ./tools/setup.sh /setup.sh
-RUN chmod +x /setup.sh
-ENTRYPOINT [ "/setup.sh" ]
+RUN chmod +x /setup.sh && /setup.sh
+ENTRYPOINT [ "redis-server", "--protected-mode", "no" ]
 ```
 
 The following script will be used to configure the redis-cache database server for wordpress.
@@ -190,11 +179,10 @@ The following script will be used to configure the redis-cache database server f
 #!/bin/bash
 
 sed -i 's/bind 127.0.0.1/bind 0.0.0.0/g' /etc/redis/redis.conf
-echo <<EOF
+echo <<EOF > /etc/redis/redis.conf
 maxmemory 256mb
 maxmemory-policy allkeys-lfu
 EOF
-redis-server --protected-mode no
 ```
 
 # FTP (File Transfer Protocol) server :
@@ -257,12 +245,11 @@ I created a simple website with html, css and js that will served using an nginx
 ```bash
 FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
-RUN apt-get install -y nginx openssl
+RUN apt-get install -y nginx
 COPY ./tools/website /var/www/html
-COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 COPY ./tools/setup.sh /
-RUN chmod +x /setup.sh
-ENTRYPOINT [ "/setup.sh" ]
+RUN chmod +x /setup.sh && /setup.sh
+ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
 ```
 
 The following script will be used to setup nginx.
@@ -276,25 +263,13 @@ http {
     include /etc/nginx/mime.types;
 
     server {
-        listen 1200 ssl;
+        listen 1200;
         root /var/www/html;
         server_name ${INCEPTION_LOGIN}.42.fr;
         index index.html;
-
-        ssl_certificate /etc/nginx/ssl/inception.crt;
-        ssl_certificate_key /etc/nginx/ssl/inception.key;
-        ssl_protocols TLSv1.2 TLSv1.3;
     }
 }
 EOF
-
-mkdir -p /etc/nginx/ssl
-chown -R www-data:www-data /var/www/html
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/nginx/ssl/inception.key \
-    -out /etc/nginx/ssl/inception.crt \
-    -subj "/C=MO/ST=KH/O=42/OU=42/CN=${INCEPTION_LOGIN}.42.fr"
-nginx -g "daemon off;"
 ```
 
 # Adminer :
@@ -306,8 +281,8 @@ FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y wget php php-mysqli
 COPY ./tools/setup.sh /setup.sh
-RUN chmod +x /setup.sh
-ENTRYPOINT [ "/setup.sh" ]
+RUN chmod +x /setup.sh && /setup.sh
+ENTRYPOINT [ "php", "-S", "0.0.0.0:8080", "-t", "/var/www/html" ]
 ```
 
 The following script will be used to setup adminer.
@@ -316,7 +291,6 @@ The following script will be used to setup adminer.
 mkdir -p /var/www/html
 chown -R www-data:www-data /var/www/html
 wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1.php -O /var/www/html/index.php
-php -S 0.0.0.0:8000 -t /var/www/html
 ```
 
 # rsync :
@@ -331,8 +305,8 @@ RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y cron rsync mariadb-client
 COPY ./tools/setup.sh /setup.sh
 COPY ./tools/backup.sh /backup.sh
-RUN chmod +x /setup.sh && chmod +x /backup.sh
-ENTRYPOINT [ "/setup.sh" ]
+RUN chmod +x /setup.sh && chmod +x /backup.sh && /setup.sh
+ENTRYPOINT [ "cron", "-f" ]
 ```
 
 The following script will be used to take backup the website data.
@@ -341,7 +315,10 @@ The following script will be used to take backup the website data.
 rm -rf /home/backup/wordpress/*
 mkdir -p /home/backup/wordpress /home/backup/database
 rsync -a /var/www/html/ /home/backup/wordpress/
-mysqldump -h mariadb -P 3306 -u $INCEPTION_MYSQL_USER -p$INCEPTION_MYSQL_PASS $INCEPTION_MYSQL_DATABASE > /home/backup/database/db_backup.sql
+mysqldump -h mariadb -P 3306 \
+    -u ${INCEPTION_MYSQL_USER} \
+    -p${INCEPTION_MYSQL_PASS} \
+    ${INCEPTION_MYSQL_DATABASE} > /home/backup/database/db_backup.sql
 ```
 
 The following script will be used to setup crontab.
@@ -349,13 +326,11 @@ The following script will be used to setup crontab.
 ```bash
 cron_job="0 8 * * 1 /backup.sh"
 { env | grep MYSQL; echo "$cron_job"; } | crontab -
-cron -f
 ```
 
 # Compose file :
 
 ```docker
-
 services:
   nginx:
     build: requirements/nginx
@@ -373,7 +348,7 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   mariadb:
     build: requirements/mariadb
@@ -386,7 +361,7 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   wordpress:
     build: requirements/wordpress
@@ -401,7 +376,8 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
+
 
   redis:
     build: requirements/bonus/redis
@@ -410,7 +386,7 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   ftp:
     build: requirements/bonus/ftp
@@ -426,7 +402,7 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   static:
     build: requirements/bonus/static
@@ -440,19 +416,19 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   adminer:
     build: requirements/bonus/adminer
     container_name: adminer
     image: adminer:tar
     ports:
-      - target: 8000
-        published: 8000
+      - target: 8080
+        published: 8080
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   rsync:
     build: requirements/bonus/rsync
@@ -466,7 +442,8 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
+
 
 volumes:
   wordpress:
