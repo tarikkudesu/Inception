@@ -12,16 +12,16 @@ RESET			=	\033[0m
 cols			=	$$(tput cols)
 SE				=	$$(printf "%-$(cols)s" "_" | tr ' ' '_')
 
-all: mkdir build up
+all: up
 
-up:
-	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@ -d
+up: mkdir
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@ --build -d
 down:
 	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
 build:
 	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
 ps:
-	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
+	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@ --all
 top:
 	@INCEPTION_LOGIN=$(INCEPTION_LOGIN) docker compose -f $(COMPOSEFILE) $@
 stop:
@@ -71,4 +71,4 @@ prune: fclean
 
 re: fclean up
 
-.PHONY: up down build ps top stop restart ls cleancontainers cleanimages cleannetworks cleanvolumes clean fclean prune re
+.PHONY: up down build ps top stop restart mkdir rmdir ls cleancontainers cleanimages cleannetworks cleanvolumes clean fclean prune re

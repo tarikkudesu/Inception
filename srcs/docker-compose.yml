@@ -16,7 +16,7 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   mariadb:
     build: requirements/mariadb
@@ -29,7 +29,7 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   wordpress:
     build: requirements/wordpress
@@ -44,7 +44,8 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
+
 
   redis:
     build: requirements/bonus/redis
@@ -53,7 +54,7 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   ftp:
     build: requirements/bonus/ftp
@@ -65,11 +66,11 @@ services:
       - "21:21"
       - "30000-30009:30000-30009"
     volumes:
-      - wordpress:/var/www/html
+      - wordpress:/home/wordpress
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   static:
     build: requirements/bonus/static
@@ -80,20 +81,22 @@ services:
     ports:
       - target: 1200
         published: 1200
+    networks:
+      - inception
     restart:
-      always
+      on-failure
 
   adminer:
     build: requirements/bonus/adminer
     container_name: adminer
     image: adminer:tar
     ports:
-      - target: 8000
-        published: 8000
+      - target: 8080
+        published: 8080
     networks:
       - inception
     restart:
-      always
+      on-failure
 
   rsync:
     build: requirements/bonus/rsync
@@ -107,7 +110,8 @@ services:
     networks:
       - inception
     restart:
-      always
+      on-failure
+
 
 volumes:
   wordpress:
@@ -124,7 +128,6 @@ volumes:
       type: bind
       o: bind
       device: "/home/${INCEPTION_LOGIN}/data/database"
-
   rsync:
     name: rsync
     driver: local
